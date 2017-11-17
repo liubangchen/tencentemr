@@ -147,7 +147,7 @@
 	  </descriptorRefs>
 	  <archive>
 	  <manifest>
-	  <mainClass>com.tencent.qcloud.emr.kafka.MessageProducer</mainClass>
+	  <mainClass>com.tencent.cloud.emr.Main</mainClass>
 	  </manifest>
 	  </archive>
 	  </configuration>
@@ -176,7 +176,7 @@
 	  </compilerArgs>
 	</configuration>
       </plugin>
-      <plugin>
+      <!--plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
         <executions>
@@ -196,7 +196,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin-->
     </plugins>
   </build>
   <repositories>
