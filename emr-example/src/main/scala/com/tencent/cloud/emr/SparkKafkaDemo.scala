@@ -1,13 +1,16 @@
 package com.tencent.cloud.emr
 
-import kafka.serializer.StringDecoder
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkConf
-import org.apache.spark.streaming.kafka.KafkaUtils
+import org.apache.spark.streaming.kafka010._
+import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
+import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.slf4j.LoggerFactory
 
 
 /**
+  *
   *
   */
 object SparkKafkaDemo {
@@ -15,17 +18,30 @@ object SparkKafkaDemo {
   val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setAppName("rttcount")
-    val ssc = new StreamingContext(conf, Seconds(30))
-    val topics = Set("netflow")
-    val brokers = "100.91.170.97:9092"
-    val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers)
 
-    val stream = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics)
+    val conf = new SparkConf().setAppName("sparkStreamingTest")
+    val ssc = new StreamingContext(conf, Seconds(1))
+    val topics = Set("testdataset")
+    val brokers = "10.0.0.184:9092"
+    val kafkaParams = Map[String, Object]("bootstrap.servers" -> brokers,
+      "key.deserializer" -> classOf[StringDeserializer],
+      "value.deserializer" -> classOf[StringDeserializer],
+      "group.id" -> "use_a_separate_group_id_for_each_stream",
+      "auto.offset.reset" -> "latest",
+      "enable.auto.commit" -> (false: java.lang.Boolean)
+    )
 
-    val messages = stream.flatMap {
-      x => x._2.split(";")
-    }
+    val stream = KafkaUtils.createDirectStream[String, String](
+      ssc,
+      PreferConsistent,
+      Subscribe[String, String](topics, kafkaParams)
+    )
+    val data = stream.flatMap(r => {
+      r.value().split(",")
+    })
+    val datamap = data.map(x => (x, 1))
+    val wordCounts = datamap.reduceByKey(_ + _)
+    wordCounts.print()
     ssc.start()
     ssc.awaitTermination()
 
