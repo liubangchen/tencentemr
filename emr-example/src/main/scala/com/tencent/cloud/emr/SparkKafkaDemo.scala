@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 
 /**
-  *
+  *bin/spark-submit --master yarn-cluster --num-executors 10 --class com.tencent.cloud.emr.SparkKafkaDemo  ./emr-example-1.0-SNAPSHOT-jar-with-dependencies.jar
   *
   */
 object SparkKafkaDemo {
@@ -26,7 +26,7 @@ object SparkKafkaDemo {
     val kafkaParams = Map[String, Object]("bootstrap.servers" -> brokers,
       "key.deserializer" -> classOf[StringDeserializer],
       "value.deserializer" -> classOf[StringDeserializer],
-      "group.id" -> "use_a_separate_group_id_for_each_stream",
+      "group.id" -> "emrtestgroup",
       "auto.offset.reset" -> "latest",
       "enable.auto.commit" -> (false: java.lang.Boolean)
     )

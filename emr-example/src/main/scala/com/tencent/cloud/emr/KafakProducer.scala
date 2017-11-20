@@ -8,6 +8,7 @@ import scala.util.Random
 /**
   * bin/kafka-topics.sh --create --zookeeper 10.0.0.56:2181 --replication-factor 1 --partitions 4 --topic testdataset
   * Created by liubangchen on 2017/11/17.
+  * java -classpath ./jars/scala-library-2.11.8.jar:./emr-example-1.0-SNAPSHOT-jar-with-dependencies.jar  com.tencent.cloud.emr.KafakProducer
   */
 
 
