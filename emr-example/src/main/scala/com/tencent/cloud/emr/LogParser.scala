@@ -3,18 +3,17 @@ package com.tencent.cloud.emr
 import java.net.{URI, URLDecoder}
 import java.util.Date
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang.time.{DateFormatUtils, DateUtils}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.SparkSession
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by liubangchen on 2017/11/21.
-  * spark-submit  --class  com.tencent.cloud.emr.LogParser ./emr-example-1.0-SNAPSHOT.jar
+  * spark-submit  --class  com.tencent.cloud.emr.LogParser ./emr-example-1.0-SNAPSHOT.jar 2017-11-2120:10
   */
 object LogParser {
 
@@ -32,32 +31,60 @@ object LogParser {
     return false
   }
 
+  def decoderValue(v: String): (String) = {
+    try {
+      URLDecoder.decode(v, "UTF-8")
+    } catch {
+      case e: Exception => {
+        v
+      }
+    }
+  }
 
-  def parseData(str: String, sc: SparkContext): (RDD[String]) = {
-    val data: Array[String] = new Array[String](2)
+  def parseData(str: String, session: SparkSession): (String) = {
+    //val data: Array[String] = new Array[String](2)
     val tmpary = str.split(" ")
     val urlinfo = tmpary(8)
     val index = urlinfo.indexOf("?")
+    if (index < 0) {
+      return "{}"
+    }
     val url = urlinfo.substring(0, index)
     val params = urlinfo.substring(index + 1, urlinfo.length)
-
-    var paramsmap = params.split("&").map(v => {
-      val m = v.split("=", 2).map(s => URLDecoder.decode(s, "UTF-8"))
-      m(0) -> m(1)
-    }).toMap
-    paramsmap += ("url" -> url)
     val mapper = new ScalaObjectMapper()
-    data(0) = tmpary(0)
-    data(1) = mapper.writeValueAsString(paramsmap)
-    return sc.makeRDD(data)
+    var paramsmap: Map[String, String] = Map()
+    try {
+      paramsmap = params.split("&").map(v => {
+        var value = v
+        if (v.indexOf("=") < 0) {
+          value = v + "= "
+        }
+        val m = value.split("=", 2).map(s => decoderValue(s))
+        m(0) -> m(1)
+      }).toMap
+      paramsmap += ("url" -> url)
+    } catch {
+      case e: Exception => {
+        println(params)
+        throw e
+      }
+    }
+
+    //data(0) = tmpary(0)
+    //data(1) = mapper.writeValueAsString(paramsmap)
+    return mapper.writeValueAsString(paramsmap) //sc.makeRDD(mapper.writeValueAsString(paramsmap))
   }
 
   def main(args: Array[String]): Unit = {
     val conf = new Configuration();
+    if (args == null || args.length <= 0) {
+      println("please input time")
+      System.exit(0)
+    }
     //conf.addResource(new Path("file:///usr/local/service/hadoop/etc/hadoop/core-site.xml"))
     //conf.addResource(new Path("file:///usr/local/service/hadoop/etc/hadoop/hdfs-site.xml"))
     val fileSystem = FileSystem.get(new URI("cosn://hadoopshanghai/"), conf)
-    val starttime = DateUtils.parseDate("2017-11-2117:05", Array[String] {
+    val starttime = DateUtils.parseDate(args(0), Array[String] {
       "yyyy-MM-ddHH:mm"
     })
     val now = new Date();
@@ -77,21 +104,21 @@ object LogParser {
       }
     }
 
-    val sparkconf = new SparkConf().setAppName("sparkStreamingTest")
-    val sc = new SparkContext(sparkconf)
+    var sparksession = SparkSession.builder().appName("logparse").getOrCreate();
+    var allrdd = sparksession.sparkContext.emptyRDD[String]
+
     for (i <- 0 until (acceptfiles.length)) {
       val fullpath = acceptfiles(i)
-      val rdd = sc.textFile(fullpath)
-      rdd.take(1).map(v => {
-        parseData(v, sc)
-      }).foreach(arg => {
-        arg.foreach(v => {
-          println(v)
-        })
+      val rdd = sparksession.read.textFile(fullpath).rdd
+      var jsonrdd = rdd.map(v => {
+        parseData(v, sparksession)
       })
-      println(fullpath)
+      allrdd = allrdd.union(jsonrdd)
     }
-
+    val df = sparksession.read.json(allrdd)
+    df.createTempView("params")
+    var ret = sparksession.sql("select count(*) from params")
+    ret.show()
     fileSystem.close()
   }
 }
