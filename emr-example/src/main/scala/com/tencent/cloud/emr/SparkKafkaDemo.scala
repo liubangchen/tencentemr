@@ -20,7 +20,7 @@ object SparkKafkaDemo {
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf().setAppName("sparkStreamingTest")
-    val ssc = new StreamingContext(conf, Seconds(1))
+    val ssc = new StreamingContext(conf, Seconds(20))
     val topics = Set("testdataset")
     val brokers = "10.0.0.184:9092"
     val kafkaParams = Map[String, Object]("bootstrap.servers" -> brokers,
