@@ -9,5 +9,5 @@ pvuid STRING
 )
 PARTITIONED BY (ds STRING )
 STORED AS ORC
-LOCATION 'cosn://hadoopshanghai/hive'
+LOCATION 'cosn://hadoopshanghai/hive/requestinfo'
 tblproperties ("orc.compress"="SNAPPY");
