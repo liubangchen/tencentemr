@@ -2,13 +2,11 @@ package com.tencent.cloud.emr
 
 import java.net.{URI, URLDecoder}
 import java.util.Date
-
+import com.tencent.cloud.emr.modle.Requestinfo
 import org.apache.commons.lang.time.{DateFormatUtils, DateUtils}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
-
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -41,8 +39,7 @@ object LogParser {
     }
   }
 
-  def parseData(str: String, session: SparkSession): (String) = {
-    //val data: Array[String] = new Array[String](2)
+  def parseData(str: String, ds: String, session: SparkSession): (String) = {
     val tmpary = str.split(" ")
     val urlinfo = tmpary(8)
     val index = urlinfo.indexOf("?")
@@ -62,17 +59,23 @@ object LogParser {
         val m = value.split("=", 2).map(s => decoderValue(s))
         m(0) -> m(1)
       }).toMap
-      paramsmap += ("url" -> url)
+
     } catch {
       case e: Exception => {
         println(params)
         throw e
       }
     }
+    var req = new Requestinfo(paramsmap.get("city").getOrElse(""),
+      paramsmap.get("country").getOrElse(""),
+      paramsmap.get("ip").getOrElse(""),
+      paramsmap.get("appid").getOrElse(""),
+      paramsmap.get("mobile").getOrElse(""),
+      paramsmap.get("imsi").getOrElse(""),
+      paramsmap.get("pvuid").getOrElse("")
+    )
 
-    //data(0) = tmpary(0)
-    //data(1) = mapper.writeValueAsString(paramsmap)
-    return mapper.writeValueAsString(paramsmap) //sc.makeRDD(mapper.writeValueAsString(paramsmap))
+    return mapper.writeValueAsString(req) //sc.makeRDD(mapper.writeValueAsString(paramsmap))
   }
 
   def main(args: Array[String]): Unit = {
@@ -81,15 +84,14 @@ object LogParser {
       println("please input time")
       System.exit(0)
     }
-    //conf.addResource(new Path("file:///usr/local/service/hadoop/etc/hadoop/core-site.xml"))
-    //conf.addResource(new Path("file:///usr/local/service/hadoop/etc/hadoop/hdfs-site.xml"))
     val fileSystem = FileSystem.get(new URI("cosn://hadoopshanghai/"), conf)
     val starttime = DateUtils.parseDate(args(0), Array[String] {
       "yyyy-MM-ddHH:mm"
     })
     val now = new Date();
     val dateval = DateFormatUtils.format(now, "yyyy/MM/dd")
-    val rootdir = "cosn://hadoopshanghai/nginx_log/pv/2017/11/21"
+    val ds = DateFormatUtils.format(now, "yyyyMMdd")
+    val rootdir = "cosn://hadoopshanghai/nginx_log/pv/" + dateval
     val filestatus = fileSystem.listStatus(new Path(rootdir))
 
     var acceptfiles: ArrayBuffer[String] = ArrayBuffer[String]()
@@ -104,21 +106,27 @@ object LogParser {
       }
     }
 
-    var sparksession = SparkSession.builder().appName("logparse").getOrCreate();
+    var sparksession = SparkSession.builder().appName("logparse").
+      enableHiveSupport().
+      getOrCreate();
     var allrdd = sparksession.sparkContext.emptyRDD[String]
+    var bds = sparksession.sparkContext.broadcast[String](ds)
+
 
     for (i <- 0 until (acceptfiles.length)) {
       val fullpath = acceptfiles(i)
       val rdd = sparksession.read.textFile(fullpath).rdd
       var jsonrdd = rdd.map(v => {
-        parseData(v, sparksession)
+        parseData(v, bds.value, sparksession)
       })
       allrdd = allrdd.union(jsonrdd)
     }
     val df = sparksession.read.json(allrdd)
-    df.createTempView("params")
-    var ret = sparksession.sql("select count(*) from params")
-    ret.show()
+    df.write.mode(SaveMode.Overwrite).format("ORC").
+      saveAsTable("requestinfo_tmp")
+    //var insertsql: String = "insert into table requestinfo partition (ds='" + bds.value + "') select * from requestinfo_tmp"
+    //sparksession.sql(insertsql)
+    //sparksession.sql("drop table requestinfo_tmp")
     fileSystem.close()
   }
 }
