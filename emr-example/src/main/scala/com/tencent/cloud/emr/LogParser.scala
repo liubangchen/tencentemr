@@ -122,7 +122,7 @@ object LogParser {
       allrdd = allrdd.union(jsonrdd)
     }
     val df = sparksession.read.json(allrdd)
-    df.write.mode(SaveMode.Overwrite).format("ORC").
+    df.write.mode(SaveMode.Append).format("ORC").partitionBy("ds").
       saveAsTable("requestinfo_tmp")
     //var insertsql: String = "insert into table requestinfo partition (ds='" + bds.value + "') select * from requestinfo_tmp"
     //sparksession.sql(insertsql)
