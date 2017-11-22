@@ -107,6 +107,7 @@ object LogParser {
     }
 
     var sparksession = SparkSession.builder().appName("logparse").
+      config("hive.exec.dynamic.partition.mode", "nonstrict").
       enableHiveSupport().
       getOrCreate();
     var allrdd = sparksession.sparkContext.emptyRDD[String]
@@ -122,11 +123,10 @@ object LogParser {
       allrdd = allrdd.union(jsonrdd)
     }
     val df = sparksession.read.json(allrdd)
-    df.write.mode(SaveMode.Append).format("ORC").
-      saveAsTable("requestinfo_tmp")
-    //var insertsql: String = "insert into table requestinfo partition (ds='" + bds.value + "') select * from requestinfo_tmp"
-    //sparksession.sql(insertsql)
-    //sparksession.sql("drop table requestinfo_tmp")
+    df.repartition(1).write.mode(SaveMode.Append).format("ORC").saveAsTable("requestinfo_tmp")
+    var insertsql: String = "insert into table requestinfo partition (ds='" + bds.value + "') select * from requestinfo_tmp"
+    sparksession.sql(insertsql)
+    sparksession.sql("drop table requestinfo_tmp")
     fileSystem.close()
   }
 }
