@@ -1,9 +1,9 @@
-package main.java.qcloud;
+package com.qcloud;
 
 import java.lang.reflect.Method;
 import java.util.TreeMap;
 
-import main.java.qcloud.Module.Base;
+import com.qcloud.Module.Base;
 
 /**
  * @brief 模块调用类

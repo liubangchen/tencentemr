@@ -1,4 +1,4 @@
-package main.java.qcloud.Utilities.Json;
+package com.qcloud.Utilities.Json;
 
 /**
  * The JSONException is thrown by the JSON.org classes when things are amiss.

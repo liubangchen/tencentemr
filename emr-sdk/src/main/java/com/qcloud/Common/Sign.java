@@ -1,4 +1,4 @@
-package main.java.qcloud.Common;
+package com.qcloud.Common;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -10,7 +10,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 //import sun.misc.BASE64Encoder;
 //import org.apache.commons.codec.binary.Base64;
-import main.java.qcloud.Utilities.Base64;
+import com.qcloud.Utilities.Base64;
+import com.sun.corba.se.impl.protocol.giopmsgheaders.RequestMessage;
 
 public class Sign {
 	// 编码方式

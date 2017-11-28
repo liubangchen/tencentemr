@@ -1,4 +1,4 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 public class Tdsql extends Base {
 	//protected String serverHost = "tdsql.api.qcloud.com";

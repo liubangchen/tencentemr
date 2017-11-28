@@ -1,4 +1,4 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 public class Eip extends Base {
 	public Eip(){

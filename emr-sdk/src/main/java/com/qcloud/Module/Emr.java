@@ -1,4 +1,4 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 public class Emr extends Base {
     //protected String serverHost = "cvm.api.qcloud.com";

@@ -1,4 +1,4 @@
-package main.java.qcloud.Utilities.Json;
+package com.qcloud.Utilities.Json;
 
 /*
  Copyright (c) 2002 JSON.org

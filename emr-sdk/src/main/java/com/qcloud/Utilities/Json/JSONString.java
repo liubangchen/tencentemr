@@ -1,4 +1,4 @@
-package main.java.qcloud.Utilities.Json;
+package com.qcloud.Utilities.Json;
 /**
  * The <code>JSONString</code> interface allows a <code>toJSONString()</code>
  * method so that a class can change the behavior of

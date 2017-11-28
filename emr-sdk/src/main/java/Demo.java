@@ -1,8 +1,9 @@
 import java.util.TreeMap;
 
-import main.java.qcloud.Module.Emr;
-import main.java.qcloud.QcloudApiModuleCenter;
-import main.java.qcloud.Utilities.Json.JSONObject;
+import com.qcloud.Module.Emr;
+import com.qcloud.QcloudApiModuleCenter;
+import com.qcloud.Module.Cvm;
+import com.qcloud.Utilities.Json.JSONObject;
 
 public class Demo {
 	public static void main(String[] args) {

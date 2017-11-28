@@ -1,4 +1,4 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.TreeMap;
 
-import main.java.qcloud.Utilities.MD5;
+import com.qcloud.Utilities.MD5;
 
 public class Cdn extends Base {
 	

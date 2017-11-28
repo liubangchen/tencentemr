@@ -1,4 +1,4 @@
-package main.java.qcloud.Utilities;
+package com.qcloud.Utilities;
 
 import java.io.FileInputStream;
 import java.io.IOException;

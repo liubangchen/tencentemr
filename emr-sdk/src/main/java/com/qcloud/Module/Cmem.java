@@ -1,4 +1,4 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 public class Cmem extends Base {
 	//protected String serverHost = "cmem.api.qcloud.com";

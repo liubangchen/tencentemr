@@ -1,4 +1,4 @@
-package main.java.qcloud.Utilities.Json;
+package com.qcloud.Utilities.Json;
 
 import java.io.IOException;
 import java.io.Writer;

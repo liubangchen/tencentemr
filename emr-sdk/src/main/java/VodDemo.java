@@ -1,10 +1,10 @@
 import java.io.File;
 import java.util.TreeMap;
 
-import main.java.qcloud.QcloudApiModuleCenter;
-import main.java.qcloud.Module.Vod;
-import main.java.qcloud.Utilities.SHA1;
-import main.java.qcloud.Utilities.Json.JSONObject;
+import com.qcloud.QcloudApiModuleCenter;
+import com.qcloud.Module.Vod;
+import com.qcloud.Utilities.SHA1;
+import com.qcloud.Utilities.Json.JSONObject;
 
 public class VodDemo {
 	public static void main(String[] args) {

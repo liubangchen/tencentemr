@@ -1,11 +1,11 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.TreeMap;
 
-import main.java.qcloud.Utilities.SHA1;
+import com.qcloud.Utilities.SHA1;
 
 public class Vod extends Base {
 	public Vod(){

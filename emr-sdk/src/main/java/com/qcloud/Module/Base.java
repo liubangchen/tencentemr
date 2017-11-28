@@ -1,7 +1,6 @@
-package main.java.qcloud.Module;
+package com.qcloud.Module;
 
 import com.qcloud.Common.*;
-import main.java.qcloud.Common.Request;
 
 import java.util.TreeMap;
 
