@@ -18,44 +18,35 @@ object CosLogParser {
     var output = args(1)
 
     val conf = new SparkConf().setAppName("cosLogParse")
+    conf.set("spark.hadoop.validateOutputSpecs", "false")
     val spark = new SparkContext(conf)
     var rdds = spark.textFile(input)
-    var totalrdds = spark.emptyRDD[String]
 
-    spark.setCheckpointDir("/spark/checkpoint")
+    var outputrdd = spark.emptyRDD[String]
 
-    var allrdd = rdds.filter(line => line.split(",").size >= 3).map(line => {
-      var linewords = line.split(",")
-      val size = linewords.size
-      var k: String = ""
-      var v: Long = 0
+    var totalrdds = rdds.filter(line => line.split(",").size >= 3).map(line => {
+      val linewords = line.split(",")
+      var key = ""
+      var value = (0: Long, 0: Long) //统计值，实际值
       if (linewords(2).length > 18) {
-        k = linewords(size - 2) + "-R"
-        v = 1
+        key = linewords(linewords.size - 2)
+        value = (0, 1)
       } else {
-        k = linewords(0) + "-T"
-        v = linewords(2).toLong
+        var v: Long = 0
+        try {
+          v = linewords(2).toLong
+        } catch {
+          case e: Exception => {
+            v = 0
+          }
+        }
+        key = linewords(0)
+        value = (v, 0)
       }
-      (k, v)
+      (key, value)
     }).reduceByKey((v1, v2) => {
-      v1 + v2
-    })
-
-    allrdd.cache()
-
-    var realvalrdd = spark.broadcast(allrdd.filter(v => v._1.split("-")(1).equals("R")).collect().toMap)
-
-
-    allrdd.filter(v => v._1.split("-")(1).equals("T")).map(item => {
-      var aary = item._1.split("-")
-      var sh = aary(0)
-      var t = aary(1)
-      var value = item._2
-      var cnt: Long = -1
-      if (realvalrdd.value.contains(sh + "-R")) {
-        cnt = realvalrdd.value.get(sh + "-R").get
-      }
-      (sh, value + ":" + cnt)
+      (v1._1 + v2._1, v1._2 + v2._2)
     }).saveAsTextFile(output)
+
   }
 }
