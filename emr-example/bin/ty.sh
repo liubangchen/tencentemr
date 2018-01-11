@@ -1,5 +1,6 @@
 #!/bin/bash
 # set environment variables (if not already done)
+#https://github.com/yahoo/TensorFlowOnSpark/wiki/GetStarted_YARN
 export PYTHON_ROOT=./Python
 export LD_LIBRARY_PATH=${PATH}
 export PYSPARK_PYTHON=${PYTHON_ROOT}/bin/python
