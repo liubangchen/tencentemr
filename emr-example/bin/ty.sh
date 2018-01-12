@@ -10,14 +10,16 @@ export QUEUE=gpu
 
 # set paths to libjvm.so, libhdfs.so, and libcuda*.so
 #export LIB_HDFS=/opt/cloudera/parcels/CDH/lib64                      # for CDH (per @wangyum)
-export LIB_HDFS=$HADOOP_PREFIX/lib/native/Linux-amd64-64
+export LIB_HDFS=/usr/local/service/hadoop/lib/native/
 export LIB_JVM=$JAVA_HOME/jre/lib/amd64/server
-export LIB_CUDA=/usr/local/cuda-7.5/lib64
+#export LIB_CUDA=/usr/local/cuda-7.5/lib64
 
 # for CPU mode:
 # export QUEUE=default
 # remove references to $LIB_CUDA
 
+# --conf spark.executorEnv.LD_LIBRARY_PATH=$LIB_CUDA \
+# --driver-library-path=$LIB_CUDA \
 # save images and labels as CSV files
 ${SPARK_HOME}/bin/spark-submit \
  --master yarn \
@@ -25,9 +27,7 @@ ${SPARK_HOME}/bin/spark-submit \
  --queue ${QUEUE} \
  --num-executors 4 \
  --executor-memory 4G \
- --archives hdfs:///user/${USER}/Python.zip#Python,mnist/mnist.zip#mnist \
- --conf spark.executorEnv.LD_LIBRARY_PATH=$LIB_CUDA \
- --driver-library-path=$LIB_CUDA \
+ --archives hdfs:///apps/Python.zip#Python,hdfs:///apps/mnist.zip#mnist \
  TensorFlowOnSpark/examples/mnist/mnist_data_setup.py \
  --output mnist/csv \
  --format csv
@@ -39,10 +39,31 @@ ${SPARK_HOME}/bin/spark-submit \
  --queue ${QUEUE} \
  --num-executors 4 \
  --executor-memory 4G \
- --archives hdfs:///user/${USER}/Python.zip#Python,mnist/mnist.zip#mnist \
- --jars hdfs:///user/${USER}/tensorflow-hadoop-1.0-SNAPSHOT.jar \
- --conf spark.executorEnv.LD_LIBRARY_PATH=$LIB_CUDA \
- --driver-library-path=$LIB_CUDA \
+ --archives hdfs:///apps/Python.zip#Python,hdfs:///apps/mnist.zip#mnist \
+ --jars hdfs:///apps/tensorflow-hadoop-1.0-SNAPSHOT.jar \
  TensorFlowOnSpark/examples/mnist/mnist_data_setup.py \
  --output mnist/tfr \
  --format tfr
+
+# for CPU mode:
+# export QUEUE=default
+# remove references to $LIB_CUDA
+
+# hadoop fs -rm -r mnist_model
+${SPARK_HOME}/bin/spark-submit \
+--master yarn \
+--deploy-mode cluster \
+--queue ${QUEUE} \
+--num-executors 6 \
+--executor-memory 16G \
+--py-files TensorFlowOnSpark/tfspark.zip,TensorFlowOnSpark/examples/mnist/spark/mnist_dist.py \
+--conf spark.dynamicAllocation.enabled=false \
+--conf spark.yarn.maxAppAttempts=1 \
+--archives hdfs:///apps/Python.zip#Python \
+--driver-library-path=$LIB_CUDA \
+TensorFlowOnSpark/examples/mnist/spark/mnist_spark.py \
+--images mnist/csv/train/images \
+--labels mnist/csv/train/labels \
+--mode train \
+--model mnist_model
+# to use infiniband, add --rdma
