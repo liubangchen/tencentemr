@@ -27,7 +27,7 @@ func init() {
 		logger.Error("init proxy server err:", err)
 		return
 	}
-	phost := configure.GetConfStringValueWithDefault(conf_file, "proxy.host", "0.0.0.0")
+	phost := configure.GetConfStringValueWithDefault(conf_file, "proxy.access.host", "0.0.0.0")
 	pport := configure.GetConfIntValue(conf_file, "proxy.port", 3000)
 
 	reverseproxy = NewSingleHostReverseProxy(backendURL, &ProxyInfo{
