@@ -194,7 +194,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	data, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	retdata := string(data)
-	retdata = strings.Replace(retdata, fmt.Sprintf("%s:%d", p.proxyInfo.TargetHost, p.proxyInfo.TargetPort), fmt.Sprintf("%s:%d", "127.0.0.1", p.proxyInfo.ProxyPort), -1)
+	retdata = strings.Replace(retdata, fmt.Sprintf("%s:%d", p.proxyInfo.TargetHost, p.proxyInfo.TargetPort), fmt.Sprintf("%s:%d", p.proxyInfo.ProxyHost, p.proxyInfo.ProxyPort), -1)
 	copyHeader(rw.Header(), res.Header)
 	rw.WriteHeader(res.StatusCode)
 	if len(res.Trailer) > 0 {
