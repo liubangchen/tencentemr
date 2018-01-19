@@ -51,6 +51,9 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <archive>
+                        <manifest>
+                        <mainClass>com.facebook.presto.jdbc.Main</mainClass>
+                        </manifest>
                     </archive>
                 </configuration>
                 <executions>
