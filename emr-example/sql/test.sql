@@ -10,7 +10,7 @@ pvuid STRING
 PARTITIONED BY (ds STRING )
 STORED AS ORC
 LOCATION 'cosn://hadoopshanghai/hive/requestinfo'
-tblproperties ("orc.compress"="SNAPPY");
+tblproperties ("orc.compress"="SNAPPY","orc.stripe.size"="268435456");
 
 
 CREATE external TABLE mytable(
@@ -24,4 +24,4 @@ pvuid STRING
 )
 PARTITIONED BY (ds STRING )
 STORED AS PARQUET
-tblproperties ('PARQUET.COMPRESS'='SNAPPY');
+tblproperties ('PARQUET.COMPRESS'='SNAPPY',"parquet.stripe.size"="268435456");
