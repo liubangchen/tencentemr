@@ -68,15 +68,6 @@ config = {
   'ClusterId':'emr-123456',
   'IPs.0':'192.168.0.1'
 }
-
-参数更新
-{
-  'ClusterId':'emr-123456',
-  'serviceType':'1',
-  '':'',
-
-}
-
 '''
 # 接口参数
 action_params = {
